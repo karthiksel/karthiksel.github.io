@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LetterBlur: A Letter Awaits You</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Instagram-like light gray background */
+        }
+        /* Custom CSS to blur the image and text */
+        .blur-effect {
+            filter: blur(10px);
+            transition: filter 0.5s ease-in-out;
+        }
+        /* A simple CSS animation for the progress bar to look dynamic */
+        @keyframes progress-bar-initial {
+            from { width: 0%; }
+            to { width: 0%; } /* Initial state of 0 completed tasks */
+        }
+        .progress-bar-fill {
+            animation: progress-bar-initial 2s ease-out forwards;
+        }
+        .modal {
+            background-color: rgba(0, 0, 0, 0.75); /* Dark semi-transparent overlay */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-sm mx-auto space-y-6 md:space-y-8">
+
+        <header class="flex items-center justify-between p-4 bg-white rounded-2xl shadow-xl sticky top-0 z-20">
+            <h1 class="text-2xl font-bold text-gray-800">LetterBlur</h1>
+            <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-xl font-bold">
+                VK
+            </div>
+        </header>
+
+        <div id="letter-feed" class="space-y-6">
+            </div>
+    </div>
+
+    <div id="image-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal">
+        <div class="relative w-full h-full flex items-center justify-center">
+            <img id="modal-image" src="" alt="Full screen blurred letter" class="max-w-full max-h-full object-contain blur-effect">
+            <button id="close-image-btn" class="absolute top-4 right-4 text-white text-3xl font-bold bg-black bg-opacity-50 p-2 rounded-full leading-none">
+                &times;
+            </button>
+        </div>
+    </div>
+
+    <div id="tasks-modal" class="hidden fixed inset-0 z-40 flex items-center justify-center modal p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800" id="tasks-modal-title">The 5 Tasks of Affection</h2>
+                <button id="close-tasks-btn" class="text-gray-500 text-3xl leading-none font-bold hover:text-gray-800">&times;</button>
+            </div>
+            <div id="tasks-modal-content" class="space-y-6">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // Data for both letters
+        const letters = [
+            {
+                senderName: "Karthik_selvaraj",
+                location: "IndiraNagar, Bengaluru",
+                date: "10:04 AM, August 10, 2025",
+                message: "A letter from a secret admirer awaits you, <span class=\"font-semibold text-pink-600\">Vaishnavi</span>. They are currently working on proving their affection.",
+                unblurredImage: "letter1.jpeg",
+                tasks: [
+                    "Moonrise & Moonset Hunt",
+                    "100 Moons Challenge",
+                    "The Moon Walk Marathon",
+                    "Lunar Love Poem in 4 Phases",
+                    "The Moon's Reflection"
+                ],
+                taskDetails: [
+                    {
+                        title: "1. Moonrise & Moonset Hunt",
+                        description: "In the same day, capture both moonrise and moonset in your own photos. You’ll have to track the times, be in the right place, and plan your day around it.",
+                        comment: "Shows dedication and patience — rearranging your whole day for her."
+                    },
+                    {
+                        title: "2. 100 Moons Challenge",
+                        description: "Draw 100 small moons in a notebook — each one slightly different (phases, craters, colors). On random moons, write little one-line reasons why you love her.",
+                        comment: "This is physically tiring but extremely meaningful when she sees the effort."
+                    },
+                    {
+                        title: "3. The Moon Walk Marathon",
+                        description: "Pick a distance that matches the average distance from the Earth to the Moon in km ÷ 1,000 (≈ 384 km → so walk 3.84 km in one go). Track it and write a poetic thought every 500 meters.",
+                        comment: "Turns physical effort into a symbolic journey to her."
+                    },
+                    {
+                        title: "4. Lunar Love Poem in 4 Phases",
+                        description: "Write a 4-part poem — one for each major moon phase (new, waxing, full, waning) — connecting each phase to your love story.",
+                        comment: "Combines creativity and emotional depth."
+                    },
+                    {
+                        title: "5. The Moon’s Reflection",
+                        description: "Find a place where the moon’s reflection is visible in water (lake, pond, river) and take a photo of it holding something that represents her (could be a letter corner, a gift, a flower).",
+                        comment: "Requires exploration, timing, and emotional symbolism."
+                    }
+                ]
+            },
+            {
+                senderName: "karthik_selvaraj",
+                location: "KR Puram, Bengaluru",
+                date: "18:32 PM, August 10, 2025",
+                message: "A new letter from an admirer, <span class=\"font-semibold text-pink-600\">Vaishnavi</span>. This time, it's a testament to your style and their commitment.",
+                unblurredImage: "letter2.jpg",
+                tasks: [
+                    "Nishorama Kurti #1: The Festive Find",
+                    "Nishorama Kurti #2: The Professional Pick",
+                    "Nishorama Kurti #3: The Casual Classic",
+                    "Nishorama Kurti #4: The Special Occasion",
+                    "Nishorama Kurti #5: The Surprise Style"
+                ],
+                taskDetails: [
+                    {
+                        title: "1. Nishorama Kurti #1: The Festive Find",
+                        description: "Purchase a Nishorama kurti for a festive occasion. This month is all about finding a style that sparkles.",
+                        comment: "Proves you're ready for any celebration."
+                    },
+                    {
+                        title: "2. Nishorama Kurti #2: The Professional Pick",
+                        description: "Find a Nishorama kurti suitable for a formal work occasion. Sophistication and grace are key here.",
+                        comment: "Shows you can be a boss lady in style."
+                    },
+                    {
+                        title: "3. Nishorama Kurti #3: The Casual Classic",
+                        description: "Select a comfortable yet chic Nishorama kurti for a casual day out. Think weekend brunch or a coffee date.",
+                        comment: "Demonstrates your effortless elegance."
+                    },
+                    {
+                        title: "4. Nishorama Kurti #4: The Special Occasion",
+                        description: "Choose a Nishorama kurti for a significant event, like a wedding or a big party. It should make a statement.",
+                        comment: "Highlights your ability to shine brightly on special days."
+                    },
+                    {
+                        title: "5. The Surprise Style",
+                        description: "For the final month, purchase a Nishorama kurti that is completely out of your comfort zone. Surprise yourself!",
+                        comment: "A sign of your adventurous spirit and willingness to try new things."
+                    }
+                ]
+            }
+        ];
+
+        // Add a global variable to store the index of the currently opened letter
+        let currentlyOpenLetterIndex = null;
+
+        // Update the date of the second letter with the current time
+        function updateDate() {
+            const now = new Date();
+            const timeOptions = { hour: '2-digit', minute: '2-digit' };
+            const dateOptions = { month: 'long', day: 'numeric', year: 'numeric' };
+            const timeString = now.toLocaleTimeString('en-US', timeOptions);
+            const dateString = now.toLocaleDateString('en-US', dateOptions);
+            letters[1].date = `${timeString}, ${dateString}`;
+        }
+        updateDate();
+
+        // Get all the DOM elements we'll be updating
+        const letterFeed = document.getElementById('letter-feed');
+        const imageModal = document.getElementById('image-modal');
+        const modalImage = document.getElementById('modal-image');
+        const closeImageBtn = document.getElementById('close-image-btn');
+        const tasksModal = document.getElementById('tasks-modal');
+        const tasksModalTitle = document.getElementById('tasks-modal-title');
+        const tasksModalContent = document.getElementById('tasks-modal-content');
+        const closeTasksBtn = document.getElementById('close-tasks-btn');
+
+        // Function to render all letter cards to the feed
+        function renderLetters() {
+            letterFeed.innerHTML = ''; // Clear existing content
+            letters.forEach((letter, index) => {
+                const cardHTML = `
+                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden relative z-10">
+                        <main class="p-0">
+                            <div class="flex items-center p-4">
+                                <div class="w-10 h-10 bg-gradient-to-tr from-yellow-400 to-pink-600 rounded-full overflow-hidden flex items-center justify-center text-white font-semibold mr-3">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-800 blur-effect sender-name-${index}">
+                                    ${letter.senderName}
+                                </span>
+                            </div>
+
+                            <div class="relative w-full aspect-w-16 aspect-h-9 cursor-pointer blurred-image-container image-clickable-area" data-letter-index="${index}">
+                                <img src="${letter.unblurredImage}" alt="A blurred letter" class="w-full h-auto object-cover blur-effect blurred-letter-img">
+                            </div>
+
+                            <div class="flex justify-between items-center px-4 py-2 bg-gray-50 border-b border-gray-200 text-xs text-gray-500">
+                                <span>${letter.date}</span>
+                                <span>${letter.location}</span>
+                            </div>
+
+                            <div class="p-4">
+                                <p class="text-gray-800 mb-4 text-sm">${letter.message}</p>
+
+                                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                                    <div class="bg-gradient-to-r from-blue-400 to-purple-500 h-2.5 rounded-full progress-bar-fill" style="width: 0%;"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 font-medium">
+                                    0 out of ${letter.tasks.length} tasks completed.
+                                </p>
+                                <ul class="text-xs text-gray-600 mt-2 space-y-1">
+                                    ${letter.tasks.map(task => `
+                                        <li class="flex items-center">
+                                            <svg class="w-4 h-4 text-gray-400 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                                            <span>${task}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+
+                                <button class="mt-6 block w-full text-center bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all transform hover:scale-105 view-tasks-btn" data-letter-index="${index}">
+                                    View Tasks
+                                </button>
+                            </div>
+                        </main>
+                    </div>
+                `;
+                letterFeed.innerHTML += cardHTML;
+            });
+        }
+
+        // Function to open a modal
+        function openModal(modal) {
+            modal.classList.remove('hidden');
+        }
+
+        // Function to close a modal
+        function closeModal(modal) {
+            modal.classList.add('hidden');
+        }
+
+        // Event delegation for dynamically added elements
+        letterFeed.addEventListener('click', (e) => {
+            const imageContainer = e.target.closest('.image-clickable-area');
+            const viewTasksBtn = e.target.closest('.view-tasks-btn');
+
+            if (imageContainer) {
+                e.stopPropagation();
+
+                const index = imageContainer.dataset.letterIndex;
+                const letter = letters[index];
+                
+                // Store the index of the letter we're currently viewing
+                currentlyOpenLetterIndex = index;
+
+                // Set the modal's image source to the clicked letter's image
+                modalImage.src = letter.unblurredImage;
+                
+                // Unblur the specific sender's name
+                const senderNameElement = letterFeed.querySelector(`.sender-name-${index}`);
+                senderNameElement.classList.remove('blur-effect');
+
+                openModal(imageModal);
+            }
+
+            if (viewTasksBtn) {
+                e.stopPropagation();
+
+                const index = viewTasksBtn.dataset.letterIndex;
+                const letter = letters[index];
+                
+                // Populate the tasks modal with the correct letter's data
+                tasksModalTitle.textContent = "The " + letter.tasks.length + " Tasks of Affection";
+                tasksModalContent.innerHTML = '';
+                letter.taskDetails.forEach((task) => {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'border-b pb-4 last:border-b-0';
+                    taskDiv.innerHTML = `
+                        <h3 class="font-bold text-lg text-gray-800 mb-1">${task.title}</h3>
+                        <p class="text-sm text-gray-600 mb-2">${task.description}</p>
+                        <p class="text-xs italic text-gray-500">${task.comment}</p>
+                    `;
+                    tasksModalContent.appendChild(taskDiv);
+                });
+                
+                openModal(tasksModal);
+            }
+        });
+
+        // Function to handle closing the image modal
+        function closeImageModalAndReblur() {
+            closeModal(imageModal);
+            // Re-blur the specific sender's name that was previously unblurred
+            if (currentlyOpenLetterIndex !== null) {
+                const senderNameElement = letterFeed.querySelector(`.sender-name-${currentlyOpenLetterIndex}`);
+                if (senderNameElement) {
+                    senderNameElement.classList.add('blur-effect');
+                }
+                currentlyOpenLetterIndex = null; // Reset the index
+            }
+        }
+
+        // Close image modal when the close button is clicked
+        closeImageBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeImageModalAndReblur();
+        });
+
+        // Close image modal if the user clicks outside of it
+        window.addEventListener('click', (e) => {
+            if (e.target === imageModal) {
+                closeImageModalAndReblur();
+            }
+            if (e.target === tasksModal) {
+                closeModal(tasksModal);
+            }
+        });
+
+        // Close tasks modal when the close button is clicked
+        closeTasksBtn.addEventListener('click', () => {
+            closeModal(tasksModal);
+        });
+
+        // Initialize the app by rendering the letters
+        renderLetters();
+    </script>
+</body>
+</html>

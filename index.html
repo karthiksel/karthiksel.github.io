@@ -157,17 +157,6 @@
         // Add a global variable to store the index of the currently opened letter
         let currentlyOpenLetterIndex = null;
 
-        // Update the date of the second letter with the current time
-        function updateDate() {
-            const now = new Date();
-            const timeOptions = { hour: '2-digit', minute: '2-digit' };
-            const dateOptions = { month: 'long', day: 'numeric', year: 'numeric' };
-            const timeString = now.toLocaleTimeString('en-US', timeOptions);
-            const dateString = now.toLocaleDateString('en-US', dateOptions);
-            letters[1].date = `${timeString}, ${dateString}`;
-        }
-        updateDate();
-
         // Get all the DOM elements we'll be updating
         const letterFeed = document.getElementById('letter-feed');
         const imageModal = document.getElementById('image-modal');
